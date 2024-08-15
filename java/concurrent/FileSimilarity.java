@@ -13,12 +13,25 @@ public class FileSimilarity {
         Map<String, List<Long>> fileFingerprints = new HashMap<>();
 
         // Calculate the fingerprint for each file
+        List<Thread> threads = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
         for (String path : args) {
-            List<Long> fingerprint = fileSum(path);
-            fileFingerprints.put(path, fingerprint);
+            Task t = new Task(path);
+            Thread t2 = new Thread(t, path);
+            tasks.add(t);
+            threads.add(t2);
+            t2.start();
+        }
+        
+        for(int i=0;i<tasks.size();i++){
+            threads.get(i).join();
+            fileFingerprints.put(tasks.get(i).filePath, tasks.get(i).getAns());
         }
 
         // Compare each pair of files
+        threads.clear();
+        threads = new ArrayList<>();
+        List<Task2> tasks2 = new ArrayList<>();
         for (int i = 0; i < args.length; i++) {
             for (int j = i + 1; j < args.length; j++) {
                 String file1 = args[i];
@@ -29,20 +42,6 @@ public class FileSimilarity {
                 System.out.println("Similarity between " + file1 + " and " + file2 + ": " + (similarityScore * 100) + "%");
             }
         }
-    }
-
-    private static List<Long> fileSum(String filePath) throws IOException {
-        File file = new File(filePath);
-        List<Long> chunks = new ArrayList<>();
-        try (FileInputStream inputStream = new FileInputStream(file)) {
-            byte[] buffer = new byte[100];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                long sum = sum(buffer, bytesRead);
-                chunks.add(sum);
-            }
-        }
-        return chunks;
     }
 
     private static long sum(byte[] buffer, int length) {
@@ -66,4 +65,32 @@ public class FileSimilarity {
 
         return (float) counter / base.size();
     }
+
+    public static class Task implements Runnable {
+        private final String filePath;
+        private List<Long> ans;
+        public Task(String filePath) {
+            this.filePath = filePath;
+        }
+        @Override
+        public void run() {
+            try{
+                File file = new File(filePath);
+                List<Long> chunks = new ArrayList<>();
+                try (FileInputStream inputStream = new FileInputStream(file)) {
+                    byte[] buffer = new byte[100];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buffer)) != -1) {
+                        long sum = sum(buffer, bytesRead);
+                        chunks.add(sum);
+                    }
+                }
+                this.ans = chunks;
+            }catch(Exception e){}
+        }
+        public List<Long> getAns() {
+            return ans;
+        }
+    }
+
 }
