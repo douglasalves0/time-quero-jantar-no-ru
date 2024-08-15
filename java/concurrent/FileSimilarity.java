@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.*;
 
+
 public class FileSimilarity {
 
     public static void main(String[] args) throws Exception {
@@ -105,19 +106,24 @@ public class FileSimilarity {
         public void run() {
             try{
                 int counter = 0;
-                List<Long> targetCopy = new ArrayList<>(target);
-                for (Long value : base) {
-                    if (targetCopy.contains(value)) {
-                        counter++;
-                        targetCopy.remove(value);
-                    }
+
+                Map<Long, Integer> freq1 = new HashMap<>();
+                Map<Long, Integer> freq2 = new HashMap<>();
+                
+                for(Long v: base) freq1.put(v, freq1.getOrDefault(v, 0) + 1);
+                for(Long v: target) freq2.put(v, freq2.getOrDefault(v, 0) + 1);
+
+                for (var a : freq1.entrySet()) {
+                    Integer oth = freq2.getOrDefault(a.getKey(), 0);
+                    counter += Math.min(oth, a.getValue());
                 }
+
                 this.ans = (float) counter / base.size();
             }catch(Exception e){}
         }
+
         public float getAns() {
             return ans;
         }
     }
-
 }
