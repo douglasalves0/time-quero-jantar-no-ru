@@ -106,18 +106,6 @@ public class FileSimilarity {
             try{
                 int counter = 0;
                 List<Long> targetCopy = new ArrayList<>(target);
-                Collections.sort(targetCopy);
-                Collections.sort(base);
-                
-                int l = 0,l1 = 0;
-                
-                while(l < targetCopy.size() && l1 < base.size()) {
-                    if(targetCopy.get(l) == base.get) {
-                        counter++;
-                        l1++,l2++;
-                    }
-                }
-
                 for (Long value : base) {
                     if (targetCopy.contains(value)) {
                         counter++;
